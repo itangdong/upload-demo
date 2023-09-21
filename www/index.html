@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Use ajax to upload files and monitor the upload progress</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        background-color: #f5f5f5;
+      }
+      .page-wrap {
+        text-align: center;
+        padding-top: 50px;
+      }
+      .page-title {
+        font-size: 16px;
+        color: #44a1f8;
+        padding-bottom: 50px;
+      }
+      .page-content {
+        text-align: left;
+        display: inline-block;
+        width: 300px;
+        height: 20px;
+        border: 1px solid #44a1f8;
+        border-radius: 2px;
+        position: relative;
+      }
+      .page-content #progress-bar {
+        display: inline-block;
+        width: 0px;
+        height: 20px;
+        background-color: #05f56d;
+        transition: width 0.3s ease-in-out;
+      }
+      .page-content .progress-text {
+        text-align: center;
+        width: 300px;
+        position: absolute;
+        top: 0;
+        font-size: 16px;
+        color: #413f43;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="page-wrap">
+      <div class="page-title">Use ajax to upload files and monitor the upload progress</div>
+      <input type="file" id="file-input" value="Please select file"/>
+      <button onclick="onUploadFile()">Upload</button>
+      <br />
+      <br />
+      <div class="page-content">
+        <div id="progress-bar"></div>
+        <div class="progress-text">
+          <div id="loading">Progress: 0%</div>
+        </div>
+      </div>
+    </div>
+    <script>
+      // onProgress
+      const onProgress = (e) => {
+        const progressBar = document.getElementById('progress-bar');
+        const loadingDom = document.getElementById('loading');
+        const loading = Math.round((e.loaded / e.total) * 100);
+        if (loading === 100) {
+          loadingDom.innerHTML = 'completed! ^_^';
+        } else {
+          loadingDom.innerHTML = `Progress: ${loading}%`;
+        }
+        progressBar.style.width = `${loading * 3}px`;
+      }
+      // succeed
+      const onUploadComplete = (e) => {
+        console.log("Upload successfully", e);
+      }
+      // failed
+      const onUploadFailed = (e) => {
+        console.log("Upload failure", e);
+      }
+
+      const onUploadFile = () => {
+        const file = document.getElementById('file-input').files[0];
+        if (file) {
+          const form = new FormData();
+          form.append('file', file);
+          const xhr = new XMLHttpRequest();
+          xhr.onload = onUploadComplete;
+          xhr.onerror = onUploadFailed;
+          xhr.upload.onprogress = onProgress;
+          xhr.open('POST', '/upload', true);
+          xhr.send(form);
+        } else {
+          alert('Please select file ~');
+        }
+      }
+    </script>
+  </body>
+</html>
