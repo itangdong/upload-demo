@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.bootcdn.net/ajax/libs/axios/1.3.5/axios.js"></script>
+    <title>请求接口进度</title>
+</head>
+
+<body>
+    <button @click="goPreview">点击预览word文件</button>
+    <br>
+    <progress max="100" value="0"></progress> <span class="val">0</span>
+    <script>
+        let btn = document.querySelector('button')
+        let prog = document.querySelector('progress')
+        let v = document.querySelector('.val')
+        btn.onclick = () => {
+            axios({
+                method: "get",
+                responseType: "blob", // 流文件为blob类型
+                url: "http://ashuai.work:10000/getDoc",
+                onDownloadProgress(ProgressEvent) {
+                    let percent = Math.floor((ProgressEvent.loaded / ProgressEvent.total) * 100)
+                    prog.setAttribute('value', percent)
+                    v.innerHTML = percent + '%'
+                    console.log('进度事件', ProgressEvent);
+                }
+            }).then(({ data }) => {
+                console.log(data); // 后端返回的是流文件
+                const urlObject = window.URL || window.webkitURL || window;
+                const src = urlObject.createObjectURL(data);
+                let a = document.createElement('a')
+                a.href = src
+                a.download = 'test'
+                a.click()
+            });
+        }
+    </script>
+</body>
+
+</html>
